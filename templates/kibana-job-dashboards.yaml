@@ -1,0 +1,35 @@
+{{- $root := . -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kibana-add-dashboards
+spec:
+  template:
+    metadata:
+      name: kibana-add-dashboards
+      annotations:
+          pod.beta.kubernetes.io/init-containers: '[
+             {
+                 "name": "check-kibana-service",
+                  "image": "centos:latest",
+                  "command": ["sh", "-c", "until curl kibana.mon.svc.cluster.local; do echo waiting for Kibana to come up; sleep 2; done;"]
+              }
+          ]'
+    spec:
+{{- range .Values.dashboards }}
+      containers:
+      - name: kibana-add-dashboard-{{ . }}
+        image: centos:latest
+        command:
+          - sh
+          - -c
+          - 'curl "--data-binary" "@/dashboards/{{ . }}.json" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -X POST http://{{ $root.Values.service.kibana.name }}.{{ $root.Release.Namespace }}.svc.{{ $root.Values.ClusterDomain }}/api/kibana/dashboards/import -v'
+        volumeMounts:
+        - name: dashboard-volumes
+          mountPath: /dashboards
+{{- end }}
+      restartPolicy: Never
+      volumes:
+        - name: dashboard-volumes
+          configMap:
+            name: dashboard-volumes

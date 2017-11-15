@@ -1,3 +1,4 @@
+ClusterDomain: cluster.local
 common:
   image:
     repository: quay.io/pires/docker-elasticsearch-kubernetes
@@ -5,10 +6,10 @@ common:
     pullPolicy: Always
 
   # Defines the service type for all outward-facing (non-discovery) services.
-  serviceType: LoadBalancer
+  serviceType: NodePort
 
   env:
-    CLUSTER_NAME: "myesdb"
+    CLUSTER_NAME: "ctec-elasticsearch"
     # Uncomment this if you get the "No up-and-running site-local (private)
     # addresses" error.
     # NETWORK_HOST: "_eth0_"
@@ -26,7 +27,7 @@ client:
     NODE_MASTER: "false"
     NODE_INGEST: "true"
     HTTP_ENABLE: "true"
-    ES_JAVA_OPTS: "-Xms256m -Xmx256m"
+    ES_JAVA_OPTS: "-Xms8096m -Xmx8096m"
 
 # Data nodes hold the shards that contain the documents you have indexed. Data
 # nodes handle data related operations like CRUD, search, and aggregations. 
@@ -35,6 +36,9 @@ client:
 #
 # The main benefit of having dedicated data nodes is the separation of the 
 # master and data roles.
+dashboards:
+  - kubernetes-overview-dashboard
+  - kubernetes-dashboard
 data:
   # This count will depend on your data and computation needs.
   replicas: 2
@@ -44,18 +48,18 @@ data:
     NODE_MASTER: "false"
     NODE_INGEST: "false"
     HTTP_ENABLE: "false"
-    ES_JAVA_OPTS: "-Xms256m -Xmx256m"
+    ES_JAVA_OPTS: "-Xms8096m -Xmx8096m"
 
   # If enabled, then the data nodes will be StatefulSets with associated
   # persistent volume claims.
   stateful:
-    enabled: false
+    enabled: true
 
     # This will fill quickly in production. You will want to increase it.
     size: 12Gi
 
     # The PVC storage class. On AWS "gp2" would be appropriate.
-    class: "standard"
+    class: "default"
 
 # The master node is responsible for lightweight cluster-wide actions such as
 # creating or deleting an index, tracking which nodes are part of the 
@@ -70,7 +74,7 @@ master:
     NODE_MASTER: "true"
     NODE_INGEST: "false"
     HTTP_ENABLE: "false"
-    ES_JAVA_OPTS: "-Xms256m -Xmx256m"
+    ES_JAVA_OPTS: "-Xms8096m -Xmx8096m"
 
     # The default value for this environment variable is 2, meaning a cluster
     # will need a minimum of 2 master nodes to operate. If you have 3 masters
@@ -90,6 +94,10 @@ curator:
     unit_count: 3
 
 service:
+  kibana:
+    name: kibana
+  elasticsearch:
+    name: elasticsearch
   httpPort: 9200
   transportPort: 9300
 
@@ -103,10 +111,11 @@ kibana:
   httpPort: 80
   resources:
     limits:
-      cpu: 1000m
+      cpu: 4000m
     requests:
-      cpu: 100m
+      cpu: 500m
   env:
+    #SERVER_BASEPATH: "/api/v1/proxy/namespaces/default/services/kibana"
     XPACK_GRAPH_ENABLED: "false"
     XPACK_ML_ENABLED: "false"
     XPACK_REPORTING_ENABLED: "false"
