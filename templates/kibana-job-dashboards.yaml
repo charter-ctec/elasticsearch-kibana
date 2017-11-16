@@ -1,4 +1,6 @@
 {{- $root := . -}}
+{{- $kibanaServiceName := printf "%s-%s" .Release.Name "kibana" | trunc 63 -}}
+
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -12,7 +14,7 @@ spec:
              {
                  "name": "check-kibana-service",
                   "image": "centos:latest",
-                  "command": ["sh", "-c", "until curl {{ $root.Values.service.kibana.name }}.{{ $root.Release.Namespace }}.svc.{{ $root.Values.ClusterDomain }}/; do echo waiting for Kibana to come up; sleep 2; done;"]
+                  "command": ["sh", "-c", "until curl {{ $kibanaServiceName }}/; do echo waiting for Kibana to come up; sleep 2; done;"]
               }
           ]'
     spec:
@@ -23,7 +25,7 @@ spec:
         command:
           - sh
           - -c
-          - 'curl "--data-binary" "@/dashboards/{{ . }}.json" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -X POST http://{{ $root.Values.service.kibana.name }}.{{ $root.Release.Namespace }}.svc.{{ $root.Values.ClusterDomain }}/api/kibana/dashboards/import -v'
+          - 'curl "--data-binary" "@/dashboards/{{ . }}.json" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -X POST http://{{ $kibanaServiceName }}/api/kibana/dashboards/import -v'
         volumeMounts:
         - name: dashboard-volumes
           mountPath: /dashboards

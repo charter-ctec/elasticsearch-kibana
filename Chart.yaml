@@ -6,7 +6,7 @@ home: https://www.elastic.co/products/elasticsearch
 icon: https://static-www.elastic.co/assets/blteb1c97719574938d/logo-elastic-elasticsearch-lt.svg
 maintainers:
 - name: Sean Larimore
-name: elasticsearch-kibana
+name: elasticsearch
 sources:
 - https://www.elastic.co/products/elasticsearch
 - https://github.com/pires/kubernetes-elasticsearch-cluster
