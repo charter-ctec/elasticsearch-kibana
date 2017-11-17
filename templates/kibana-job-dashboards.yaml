@@ -16,8 +16,8 @@ spec:
               }
           ]'
     spec:
-{{- range .Values.dashboards }}
       containers:
+{{- range .Values.dashboards }}
       - name: kibana-add-dashboard-{{ . }}
         image: centos:latest
         command:
