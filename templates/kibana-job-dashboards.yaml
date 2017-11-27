@@ -12,7 +12,7 @@ spec:
              {
                  "name": "check-kibana-service",
                   "image": "centos:latest",
-                  "command": ["sh", "-c", "until curl {{ $root.Values.service.kibana.name }}.{{ $root.Release.Namespace }}.svc.{{ $root.Values.ClusterDomain }}/; do echo waiting for Kibana to come up; sleep 2; done;"]
+                  "command": ["sh", "-c", "until curl {{ $root.Values.service.kibana.name }}.{{ $root.Release.Namespace }}.svc.{{ $root.Values.ClusterDomain }}/api/saved_objects/dashboard; do echo waiting for Kibana to come up; sleep 2; done;"]
               }
           ]'
     spec:
