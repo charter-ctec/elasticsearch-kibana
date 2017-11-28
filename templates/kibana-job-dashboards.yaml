@@ -23,7 +23,7 @@ spec:
         command:
           - sh
           - -c
-          - 'curl "--data-binary" "@/dashboards/{{ . }}.json" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -X POST http://{{ $root.Values.service.kibana.name }}.{{ $root.Release.Namespace }}.svc.{{ $root.Values.ClusterDomain }}/api/kibana/dashboards/import -v'
+          - 'while true; do http_status=$(curl -s -o /dev/null -w "%{http_code}" "--data-binary" "@/dashboards/{{ . }}.json" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -X POST http://{{ $root.Values.service.kibana.name }}.{{ $root.Release.Namespace }}.svc.{{ $root.Values.ClusterDomain }}/api/kibana/dashboards/import); if  [ "$http_status" -eq 200 ]; then break; fi; echo -n "."; sleep 15; done'
         volumeMounts:
         - name: dashboard-volumes
           mountPath: /dashboards
